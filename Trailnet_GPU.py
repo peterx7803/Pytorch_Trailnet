@@ -57,8 +57,8 @@ print(len(params))
 print(params[0].size())  # conv1's .weight
 
 tmp1,tmp2 = 0,0
-test_step = 10
-batchsz = 1
+test_step = 1
+batchsz = 256
 Drytest = 5
 for i in range(1,Drytest + test_step+1):
 	print 'i=', i
@@ -67,8 +67,8 @@ for i in range(1,Drytest + test_step+1):
 	torch.cuda.synchronize()
 	tf = time.time()
 	out = net(input)
-	elapsed1= time.time() -tf
 	torch.cuda.synchronize()
+	elapsed1= time.time() -tf
 	tmp1 += elapsed1
 	#print(out)
 	
@@ -93,13 +93,12 @@ for i in range(1,Drytest + test_step+1):
 	# Back prop.
 
 	net.zero_grad()     # zeroes the gradient buffers of all parameters
-	print('conv1.bias.grad before backward')
-	print(net.conv1.bias.grad)
-	torch.cuda.synchronize()
+	#print('conv1.bias.grad before backward')
+	#print(net.conv1.bias.grad)
 	tb = time.time()
 	loss.backward()
-	elapsed2 = time.time()- tb
 	torch.cuda.synchronize()
+	elapsed2 = time.time()- tb
 	tmp2 += elapsed2
 	
 	#print('conv1.bias.grad after backward')
@@ -107,6 +106,7 @@ for i in range(1,Drytest + test_step+1):
 	
 	if i<= Drytest:
 		tmp1,tmp2 = 0, 0
+
 	print tmp1, ' ', tmp2
 
 print 'fp:' ,tmp1/test_step, ' bp: ',tmp2/test_step
